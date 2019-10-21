@@ -240,23 +240,18 @@ class RBSP_finder:
                 elif line.startswith('# YYYY-MM-DDTHH:MM:SS.SSSSZ'):
                     head = False
 
-        sat_time_index = 0
-        sat_alt_index = 14
-        sat_lat_index = 12
-        sat_lon_index = 13
-        sat_l_index = 174
+        sat_time_i = 0
+        sat_alt_i = 14
+        sat_lat_i = 12
+        sat_lon_i = 13
+        sat_l_i = 174
 
         format = '%Y-%m-%dT%H:%M:%S.0000Z'
-        sat = [[datetime.strptime(x[sat_time_index], format),
-                float(x[sat_alt_index]),
-                float(x[sat_lat_index]),
-                float(x[sat_lon_index]),
-                float(x[sat_l_index])] for x in lines]
-
-        sat = [
-            [s[0], s[1], s[2], s[3] + (360 if s[3] < 0 else 0), s[4]]
-            for s in sat]
-
+        sat = [[datetime.strptime(x[sat_time_i], format),
+                float(x[sat_alt_i]),
+                float(x[sat_lat_i]),
+                float(x[sat_lon_i]) + (360 if float(x[sat_lon_i]) < 0 else 0),
+                float(x[sat_l_i])] for x in lines]
         return sat
 
 
