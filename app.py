@@ -97,7 +97,7 @@ class MainWnd(QMainWindow):
             results = rf.process()
             for r in results:
                 self.model.appendRow([QStandardItem(x) for x in r])
-            self.model.sort(0);
+            self.model.sort(0)
             self.startButton.setEnabled(True)
         else:
             self.show_error('Input parameters are incorrect.')
@@ -203,9 +203,9 @@ class RBSP_finder:
                                   '{:6.1f}'.format(lat),
                                   '{:6.1f}'.format(lon),
                                   '-1',  # TODO: calc dL
-                                  '{:8.1f}'.format(d_alt),
-                                  '{:6.1f}'.format(d_lat),
-                                  '{:6.1f}'.format(d_lon)])
+                                  '{:8.1f}'.format(s_alt - alt),   # d_alt
+                                  '{:6.1f}'.format(s_lat - lat),   # d_lat
+                                  '{:6.1f}'.format(s_lon - lon)])  # d_lon
         return r
 
     def _load_tube(self, filename):
