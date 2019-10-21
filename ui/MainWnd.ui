@@ -369,6 +369,25 @@
    </layout>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>ephemeridesButton</tabstop>
+  <tabstop>densityButton</tabstop>
+  <tabstop>flipRadioButton</tabstop>
+  <tabstop>fieldLineButton</tabstop>
+  <tabstop>dAltSpinBox</tabstop>
+  <tabstop>dLatSpinBox</tabstop>
+  <tabstop>dLonSpinBox</tabstop>
+  <tabstop>manualRadioButton</tabstop>
+  <tabstop>shellSpinBox</tabstop>
+  <tabstop>dShellSpinBox</tabstop>
+  <tabstop>latSpinBox</tabstop>
+  <tabstop>lonSpinBox</tabstop>
+  <tabstop>startButton</tabstop>
+  <tabstop>tableView</tabstop>
+  <tabstop>ephemeridesEdit</tabstop>
+  <tabstop>densityEdit</tabstop>
+  <tabstop>fieldLineEdit</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
