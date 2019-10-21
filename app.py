@@ -98,6 +98,7 @@ class MainWnd(QMainWindow):
             for r in results:
                 self.model.appendRow([QStandardItem(x) for x in r])
             self.model.sort(0)
+            self.tableView.resizeColumnsToContents()
             self.startButton.setEnabled(True)
         else:
             self.show_error('Input parameters are incorrect.')
@@ -176,7 +177,7 @@ class RBSP_finder:
         sat = self._load_sat(self.request['eph'])
         r = []
         if self.request['flip']:
-            tube = self._load_tube(self.request['lin'])
+            tube, shell = self._load_tube(self.request['lin'])
             for t in tube:
                 alt = t[0]
                 lat = t[1]
@@ -198,11 +199,11 @@ class RBSP_finder:
                                   '{:8.1f}'.format(s_alt),
                                   '{:6.1f}'.format(s_lat),
                                   '{:6.1f}'.format(s_lon),
-                                  '-1',  # TODO: read L from file
+                                  '{:6.3f}'.format(shell),
                                   '{:8.1f}'.format(alt),
                                   '{:6.1f}'.format(lat),
                                   '{:6.1f}'.format(lon),
-                                  '-1',  # TODO: calc dL
+                                  '{:6.3f}'.format(s_l - shell),  
                                   '{:8.1f}'.format(s_alt - alt),   # d_alt
                                   '{:6.1f}'.format(s_lat - lat),   # d_lat
                                   '{:6.1f}'.format(s_lon - lon)])  # d_lon
@@ -213,6 +214,8 @@ class RBSP_finder:
             lines = []
             head = True
             for line in file.readlines():
+                if line.startswith('  L-shell ='):
+                    shell = float(line.split()[2][:-1])
                 if line.startswith('    pt     alt    arc_len'):
                     header = line.split()
                     head = False
@@ -228,7 +231,7 @@ class RBSP_finder:
                  float(x[lat_index]),
                  float(x[lon_index])] for x in lines]
 
-        return tube
+        return tube, shell
 
     def _load_sat(self, filename):
         with open(filename) as file:
