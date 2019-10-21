@@ -4,7 +4,7 @@ from PyQt5 import uic
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QApplication, \
-    QMainWindow, QFileDialog, QMessageBox
+    QMainWindow, QFileDialog, QMessageBox, QHeaderView
 
 
 class MainWnd(QMainWindow):
@@ -98,7 +98,10 @@ class MainWnd(QMainWindow):
             for r in results:
                 self.model.appendRow([QStandardItem(x) for x in r])
             self.model.sort(0)
-            self.tableView.resizeColumnsToContents()
+            header = self.tableView.horizontalHeader()
+            for i in range(header.count()-1):
+                header.setSectionResizeMode(i+1, QHeaderView.Stretch)
+            header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
             self.startButton.setEnabled(True)
         else:
             self.show_error('Input parameters are incorrect.')
@@ -175,9 +178,12 @@ class RBSP_finder:
 
     def process(self):
         sat = self._load_sat(self.request['eph'])
+        d_lat_max = self.request['dLat']
+        d_lon_max = self.request['dLon']
         r = []
         if self.request['flip']:
             tube, shell = self._load_tube(self.request['lin'])
+            d_alt_max = self.request['dAlt']
             for t in tube:
                 alt = t[0]
                 lat = t[1]
@@ -192,7 +198,9 @@ class RBSP_finder:
                     d_alt = abs(s_alt - alt)
                     d_lat = abs(s_lat - lat)
                     d_lon = abs(s_lon - lon)
-                    if d_alt <= 500 and d_lat <= 10 and d_lon <= 20:
+                    if (d_alt <= d_alt_max
+                        and d_lat <= d_lat_max
+                            and d_lon <= d_lon_max):
                         r.append([
                                   s_time.isoformat(),
                                   '{:6.3f}'.format(s_l),
@@ -203,10 +211,10 @@ class RBSP_finder:
                                   '{:8.1f}'.format(alt),
                                   '{:6.1f}'.format(lat),
                                   '{:6.1f}'.format(lon),
-                                  '{:6.3f}'.format(s_l - shell),  
-                                  '{:8.1f}'.format(s_alt - alt),   # d_alt
-                                  '{:6.1f}'.format(s_lat - lat),   # d_lat
-                                  '{:6.1f}'.format(s_lon - lon)])  # d_lon
+                                  '{:6.3f}'.format(s_l - shell),
+                                  '{:8.1f}'.format(s_alt - alt),   # (+-)d_alt
+                                  '{:6.1f}'.format(s_lat - lat),   # (+-)d_lat
+                                  '{:6.1f}'.format(s_lon - lon)])  # (+-)d_lon
         return r
 
     def _load_tube(self, filename):
