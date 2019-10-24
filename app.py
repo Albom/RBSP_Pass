@@ -1,10 +1,11 @@
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from PyQt5 import uic
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QApplication, \
     QMainWindow, QFileDialog, QMessageBox, QHeaderView
+from cdflib import CDF, cdfepoch
 
 
 class MainWnd(QMainWindow):
@@ -38,6 +39,7 @@ class MainWnd(QMainWindow):
             'dAlt',
             'dLat',
             'dLon',
+            'Ne'
             ]
         self.model.setColumnCount(len(headers))
         self.model.setHorizontalHeaderLabels(headers)
@@ -177,6 +179,7 @@ class RBSP_finder:
         return self
 
     def process(self):
+        densities = self._load_densities(self.request['den'])
         sat = self._load_sat(self.request['eph'])
         d_lat_max = self.request['dLat']
         d_lon_max = self.request['dLon']
@@ -201,6 +204,13 @@ class RBSP_finder:
                     if (d_alt <= d_alt_max
                         and d_lat <= d_lat_max
                             and d_lon <= d_lon_max):
+                        delta_min = timedelta(minutes=1)
+                        ne = -1
+                        for d in densities:
+                            delta = abs(s_time - d)
+                            if delta < delta_min:
+                                ne = densities[d]
+                                delta_min = delta
                         r.append([
                                   s_time.isoformat(),
                                   '{:6.3f}'.format(s_l),
@@ -212,9 +222,10 @@ class RBSP_finder:
                                   '{:6.1f}'.format(lat),
                                   '{:6.1f}'.format(lon),
                                   '{:6.3f}'.format(s_l - shell),
-                                  '{:8.1f}'.format(s_alt - alt),   # (+-)d_alt
-                                  '{:6.1f}'.format(s_lat - lat),   # (+-)d_lat
-                                  '{:6.1f}'.format(s_lon - lon)])  # (+-)d_lon
+                                  '{:8.1f}'.format(s_alt - alt),  # (+-)d_alt
+                                  '{:6.1f}'.format(s_lat - lat),  # (+-)d_lat
+                                  '{:6.1f}'.format(s_lon - lon),  # (+-)d_lon
+                                  '{:8.1f}'.format(ne)])
         return r
 
     def _load_tube(self, filename):
@@ -264,6 +275,17 @@ class RBSP_finder:
                 float(x[sat_lon_i]) + (360 if float(x[sat_lon_i]) < 0 else 0),
                 float(x[sat_l_i])] for x in lines]
         return sat
+
+    def _load_densities(self, filename):
+        cdf = CDF(filename)
+        timestamps, densities = (
+            cdf.varget('Epoch'),
+            cdf.varget('density'))
+        dates = [datetime.fromtimestamp(t, timezone.utc).replace(tzinfo=None, microsecond=0)
+                 for t in cdfepoch.unixtime(timestamps)]
+
+        mdict = dict(zip(dates, densities))
+        return mdict
 
 
 if __name__ == '__main__':
