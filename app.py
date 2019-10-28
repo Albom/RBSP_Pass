@@ -180,10 +180,39 @@ class RBSP_finder:
 
     def process(self):
         densities = self._load_densities(self.request['den'])
+
+        def get_density():
+            delta_min = timedelta(minutes=1)
+            ne = -1
+            for d in densities:
+                delta = abs(s_time - d)
+                if delta < delta_min:
+                    ne = densities[d]
+                    delta_min = delta
+            return ne
+
         sat = self._load_sat(self.request['eph'])
         d_lat_max = self.request['dLat']
         d_lon_max = self.request['dLon']
         r = []
+
+        def append_results():
+            r.append([
+                      s_time.isoformat(),
+                      '{:6.3f}'.format(s_l),
+                      '{:8.1f}'.format(s_alt),
+                      '{:6.1f}'.format(s_lat),
+                      '{:6.1f}'.format(s_lon),
+                      '{:6.3f}'.format(shell),
+                      '{:8.1f}'.format(alt),
+                      '{:6.1f}'.format(lat),
+                      '{:6.1f}'.format(lon),
+                      '{:6.3f}'.format(s_l - shell),
+                      '{:8.1f}'.format(d_alt),
+                      '{:6.1f}'.format(d_lat),
+                      '{:6.1f}'.format(d_lon),
+                      '{:8.1f}'.format(ne)])
+
         if self.request['flip']:
             tube, shell = self._load_tube(self.request['lin'])
             d_alt_max = self.request['dAlt']
@@ -204,28 +233,40 @@ class RBSP_finder:
                     if (d_alt <= d_alt_max
                         and d_lat <= d_lat_max
                             and d_lon <= d_lon_max):
-                        delta_min = timedelta(minutes=1)
-                        ne = -1
-                        for d in densities:
-                            delta = abs(s_time - d)
-                            if delta < delta_min:
-                                ne = densities[d]
-                                delta_min = delta
-                        r.append([
-                                  s_time.isoformat(),
-                                  '{:6.3f}'.format(s_l),
-                                  '{:8.1f}'.format(s_alt),
-                                  '{:6.1f}'.format(s_lat),
-                                  '{:6.1f}'.format(s_lon),
-                                  '{:6.3f}'.format(shell),
-                                  '{:8.1f}'.format(alt),
-                                  '{:6.1f}'.format(lat),
-                                  '{:6.1f}'.format(lon),
-                                  '{:6.3f}'.format(s_l - shell),
-                                  '{:8.1f}'.format(s_alt - alt),  # (+-)d_alt
-                                  '{:6.1f}'.format(s_lat - lat),  # (+-)d_lat
-                                  '{:6.1f}'.format(s_lon - lon),  # (+-)d_lon
-                                  '{:8.1f}'.format(ne)])
+                        ne = get_density()
+                        d_alt = s_alt - alt
+                        d_lat = s_lat - lat
+                        d_lon = s_lon - lon
+                        append_results()
+        else:
+
+            shell = self.request['l']
+            lat = self.request['lat']
+            lon = self.request['lon']
+
+            d_l_max = self.request['dL']
+
+            for s in sat:
+                s_time = s[0]
+                s_alt = s[1]
+                s_lat = s[2]
+                s_lon = s[3]
+                s_l = s[4]
+
+                d_l = abs(s_l - shell)
+                d_lat = abs(s_lat - lat)
+                d_lon = abs(s_lon - lon)
+
+                if (d_l <= d_l_max
+                    and d_lat <= d_lat_max
+                        and d_lon <= d_lon_max):
+                    ne = get_density()
+                    d_l = s_l - shell
+                    d_lat = s_lat - lat
+                    d_lon = s_lon - lon
+                    alt = -1
+                    d_alt = -1
+                    append_results()
         return r
 
     def _load_tube(self, filename):
@@ -281,7 +322,8 @@ class RBSP_finder:
         timestamps, densities = (
             cdf.varget('Epoch'),
             cdf.varget('density'))
-        dates = [datetime.fromtimestamp(t, timezone.utc).replace(tzinfo=None, microsecond=0)
+        dates = [datetime.fromtimestamp(t, timezone.utc).replace(
+            tzinfo=None, microsecond=0)
                  for t in cdfepoch.unixtime(timestamps)]
 
         mdict = dict(zip(dates, densities))
