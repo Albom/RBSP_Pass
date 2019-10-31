@@ -18,10 +18,6 @@ class MainWnd(QMainWindow):
             self.densityButton,
             self.fieldLineButton]
         [b.clicked.connect(self.choose_file) for b in self.file_buttons]
-        self.radios = [
-            self.flipRadioButton,
-            self.manualRadioButton]
-        [b.clicked.connect(self.change_mode) for b in self.radios]
         self.startButton.clicked.connect(self.run)
 
         self.model = QStandardItemModel()
@@ -59,42 +55,26 @@ class MainWnd(QMainWindow):
                 edit = self.fieldLineEdit
             edit.setText(filename)
 
-    def change_mode(self):
-        sender = self.sender()
-        flip = [
-            self.fieldLineButton,
-            self.dAltSpinBox
-            ]
-        manual = [
-            self.shellSpinBox,
-            self.dShellSpinBox,
-            self.latSpinBox,
-            self.lonSpinBox]
-        if sender is self.flipRadioButton:
-            [w.setEnabled(True) for w in flip]
-            [w.setEnabled(False) for w in manual]
-        elif sender is self.manualRadioButton:
-            [w.setEnabled(False) for w in flip]
-            [w.setEnabled(True) for w in manual]
-
     def run(self):
         if self.validate():
             self.model.removeRows(0, self.model.rowCount())
             rf = RBSP_finder()
-            (rf.addEph(self.ephemeridesEdit.text()).
-             addDen(self.densityEdit.text()).
-             addDLat(self.dLatSpinBox.value()).
-             addDLon(self.dLonSpinBox.value()))
-            flip = self.flipRadioButton.isChecked()
-            rf.addType('f' if flip else 'm')
-            if flip:
-                (rf.addLin(self.fieldLineEdit.text()).
-                 addDAlt(self.dAltSpinBox.value()))
+            rf.addEph(self.ephemeridesEdit.text())
+            rf.addDen(self.densityEdit.text())
+            is_flip = self.tabWidget.currentIndex() == 0
+            rf.addType('f' if is_flip else 'm')
+            if is_flip:
+                rf.addLin(self.fieldLineEdit.text())
+                rf.addDAlt(self.dAltSpinBox.value())
+                rf.addDLat(self.dLatSpinBox.value())
+                rf.addDLon(self.dLonSpinBox.value())
             else:
-                (rf.addL(self.shellSpinBox.value()).
-                 addDL(self.dShellSpinBox.value()).
-                 addLat(self.latSpinBox.value()).
-                 addLon(self.lonSpinBox.value()))
+                rf.addL(self.shellSpinBox.value())
+                rf.addDL(self.dShellSpinBox.value())
+                rf.addLat(self.latSpinBox.value())
+                rf.addDLat(self.dLatSpinBox_2.value())
+                rf.addLon(self.lonSpinBox.value())
+                rf.addDLon(self.dLonSpinBox_2.value())
             self.startButton.setEnabled(False)
             results = rf.process()
             for r in results:
@@ -111,11 +91,12 @@ class MainWnd(QMainWindow):
     def validate(self):
         eph_filename = bool(self.ephemeridesEdit.text())
         density_filename = bool(self.densityEdit.text())
-        flip = self.flipRadioButton.isChecked()
-        flip_filename = bool(self.fieldLineEdit.text())
-        return (
-            eph_filename and density_filename and not flip or
-            eph_filename and density_filename and flip and flip_filename)
+        is_flip = self.tabWidget.currentIndex() == 0
+        if is_flip:
+            flip_filename = bool(self.fieldLineEdit.text())
+            return eph_filename and density_filename and flip_filename
+        else:
+            return eph_filename and density_filename
 
     def show_error(self, message):
         msg = QMessageBox()
