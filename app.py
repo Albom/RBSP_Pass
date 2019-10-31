@@ -22,6 +22,7 @@ class MainWnd(QMainWindow):
 
         self.model = QStandardItemModel()
         headers = [
+            'DateTime',
             'Time',
             'Sat. L',
             'Sat. Alt',
@@ -180,6 +181,7 @@ class RBSP_finder:
         def append_results():
             r.append([
                       s_time.isoformat(),
+                      '{:9.5f}'.format(dec),
                       '{:6.3f}'.format(s_l),
                       '{:8.1f}'.format(s_alt),
                       '{:6.1f}'.format(s_lat),
@@ -208,6 +210,8 @@ class RBSP_finder:
                     s_lon = s[3]
                     s_l = s[4]
 
+                    dec = s_time.hour + s_time.minute/60. + s_time.second/3600.
+
                     d_alt = abs(s_alt - alt)
                     d_lat = abs(s_lat - lat)
                     d_lon = abs(s_lon - lon)
@@ -233,6 +237,8 @@ class RBSP_finder:
                 s_lat = s[2]
                 s_lon = s[3]
                 s_l = s[4]
+
+                dec = s_time.hour + s_time.minute/60. + s_time.second/3600.
 
                 d_l = abs(s_l - shell)
                 d_lat = abs(s_lat - lat)
