@@ -19,27 +19,28 @@ class MainWnd(QMainWindow):
             self.fieldLineButton]
         [b.clicked.connect(self.choose_file) for b in self.file_buttons]
         self.startButton.clicked.connect(self.run)
+        self.saveButton.clicked.connect(self.save)
 
         self.model = QStandardItemModel()
-        headers = [
-            'DateTime',
-            'Time',
-            'Sat. L',
-            'Sat. Alt',
-            'Sat. Lat',
-            'Sat. Lon',
-            'L',
-            'Alt',
-            'Lat',
-            'Lon',
-            'dL',
-            'dAlt',
-            'dLat',
-            'dLon',
-            'Ne'
+        self.headers = [
+            '{:20s}'.format('DateTime'),
+            '{:>10s}'.format('Time'),
+            '{:>10s}'.format('Sat_L'),
+            '{:>10s}'.format('Sat_Alt'),
+            '{:>10s}'.format('Sat_Lat'),
+            '{:>10s}'.format('Sat_Lon'),
+            '{:>10s}'.format('L'),
+            '{:>10s}'.format('Alt'),
+            '{:>10s}'.format('Lat'),
+            '{:>10s}'.format('Lon'),
+            '{:>10s}'.format('dL'),
+            '{:>10s}'.format('dAlt'),
+            '{:>10s}'.format('dLat'),
+            '{:>10s}'.format('dLon'),
+            '{:>10s}'.format('Ne')
             ]
-        self.model.setColumnCount(len(headers))
-        self.model.setHorizontalHeaderLabels(headers)
+        self.model.setColumnCount(len(self.headers))
+        self.model.setHorizontalHeaderLabels([s.strip() for s in self.headers])
         self.tableView.setModel(self.model)
 
         self.showMaximized()
@@ -98,6 +99,27 @@ class MainWnd(QMainWindow):
             return eph_filename and density_filename and flip_filename
         else:
             return eph_filename and density_filename
+
+    def save(self):
+        filename, _ = QFileDialog.getSaveFileName()
+
+        if filename:
+            model = self.tableView.model()
+            data = []
+            for row in range(model.rowCount()):
+                data.append([])
+                for column in range(model.columnCount()):
+                    index = model.index(row, column)
+                    data[row].append(model.data(index))
+
+            with open(filename, 'w') as file:
+                for s in self.headers:
+                    file.write(s)
+                file.write('\n')
+                for row in range(model.rowCount()):
+                    for column in range(model.columnCount()):
+                        file.write(data[row][column])
+                    file.write('\n')
 
     def show_error(self, message):
         msg = QMessageBox()
@@ -180,21 +202,21 @@ class RBSP_finder:
 
         def append_results():
             r.append([
-                      s_time.isoformat(),
-                      '{:9.5f}'.format(dec),
-                      '{:6.3f}'.format(s_l),
-                      '{:8.1f}'.format(s_alt),
-                      '{:6.1f}'.format(s_lat),
-                      '{:6.1f}'.format(s_lon),
-                      '{:6.3f}'.format(shell),
-                      '{:8.1f}'.format(alt),
-                      '{:6.1f}'.format(lat),
-                      '{:6.1f}'.format(lon),
-                      '{:6.3f}'.format(s_l - shell),
-                      '{:8.1f}'.format(d_alt),
-                      '{:6.1f}'.format(d_lat),
-                      '{:6.1f}'.format(d_lon),
-                      '{:8.1f}'.format(ne)])
+                      '{:20s}'.format(s_time.isoformat()),
+                      '{:10.5f}'.format(dec),
+                      '{:10.3f}'.format(s_l),
+                      '{:10.2f}'.format(s_alt),
+                      '{:10.2f}'.format(s_lat),
+                      '{:10.2f}'.format(s_lon),
+                      '{:10.3f}'.format(shell),
+                      '{:10.2f}'.format(alt),
+                      '{:10.2f}'.format(lat),
+                      '{:10.2f}'.format(lon),
+                      '{:10.3f}'.format(s_l - shell),
+                      '{:10.2f}'.format(d_alt),
+                      '{:10.2f}'.format(d_lat),
+                      '{:10.2f}'.format(d_lon),
+                      '{:10.2f}'.format(ne)])
 
         if self.request['flip']:
             tube, shell = self._load_tube(self.request['lin'])

@@ -47,32 +47,6 @@
       <property name="bottomMargin">
        <number>6</number>
       </property>
-      <item row="0" column="0" colspan="2">
-       <widget class="QLineEdit" name="ephemeridesEdit">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QPushButton" name="ephemeridesButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Ephemerides file</string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="0" colspan="2">
        <widget class="QLineEdit" name="densityEdit">
         <property name="enabled">
@@ -112,16 +86,29 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="0" colspan="3">
-       <widget class="QTableView" name="tableView">
+      <item row="0" column="0" colspan="2">
+       <widget class="QLineEdit" name="ephemeridesEdit">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="sortingEnabled">
-         <bool>false</bool>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="ephemeridesButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Ephemerides file</string>
         </property>
        </widget>
       </item>
@@ -140,6 +127,19 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item row="5" column="0" colspan="3">
+       <widget class="QTableView" name="tableView">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="sortingEnabled">
+         <bool>false</bool>
+        </property>
+       </widget>
       </item>
       <item row="2" column="0" colspan="3">
        <widget class="QTabWidget" name="tabWidget">
@@ -472,6 +472,13 @@
           </item>
          </layout>
         </widget>
+       </widget>
+      </item>
+      <item row="6" column="2">
+       <widget class="QPushButton" name="saveButton">
+        <property name="text">
+         <string>Save</string>
+        </property>
        </widget>
       </item>
      </layout>
