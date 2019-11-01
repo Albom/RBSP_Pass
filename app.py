@@ -20,6 +20,7 @@ class MainWnd(QMainWindow):
         [b.clicked.connect(self.choose_file) for b in self.file_buttons]
         self.startButton.clicked.connect(self.run)
         self.saveButton.clicked.connect(self.save)
+        self.aboutButton.clicked.connect(self.about)
 
         self.model = QStandardItemModel()
         self.headers = [
@@ -43,6 +44,9 @@ class MainWnd(QMainWindow):
         self.model.setHorizontalHeaderLabels([s.strip() for s in self.headers])
         self.tableView.setModel(self.model)
 
+        self.program_name = 'RBSP_Pass version 1.0'
+        self.setWindowTitle(self.program_name)
+
         self.showMaximized()
 
     def choose_file(self, e):
@@ -63,7 +67,7 @@ class MainWnd(QMainWindow):
             rf = RBSP_finder()
             rf.addEph(self.ephemeridesEdit.text())
             rf.addDen(self.densityEdit.text())
-            is_flip = self.tabWidget.currentIndex() == 0
+            is_flip = self.tabWidget.currentIndex() == 1
             rf.addType('f' if is_flip else 'm')
             if is_flip:
                 rf.addLin(self.fieldLineEdit.text())
@@ -93,7 +97,7 @@ class MainWnd(QMainWindow):
     def validate(self):
         eph_filename = bool(self.ephemeridesEdit.text())
         density_filename = bool(self.densityEdit.text())
-        is_flip = self.tabWidget.currentIndex() == 0
+        is_flip = self.tabWidget.currentIndex() == 1
         if is_flip:
             flip_filename = bool(self.fieldLineEdit.text())
             return eph_filename and density_filename and flip_filename
@@ -120,6 +124,20 @@ class MainWnd(QMainWindow):
                     for column in range(model.columnCount()):
                         file.write(data[row][column])
                     file.write('\n')
+
+    def about(self):
+        text = (
+            '\n\n'
+            '© 2019 Oleksandr Bogomaz'
+            '\n'
+            'o.v.bogomaz1985@gmail.com')
+
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText(self.program_name + text)
+        msg.setWindowTitle('About')
+        msg.show()
+        msg.exec_()
 
     def show_error(self, message):
         msg = QMessageBox()
